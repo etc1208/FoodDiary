@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react'
 
 import type { FoodItem } from '../types/food'
 
+const BASE_URL = import.meta.env.BASE_URL
+
 interface FoodCardProps {
   food: FoodItem
   variant?: 'default' | 'compact' | 'featured'
@@ -22,8 +24,12 @@ export function FoodCard({ food, variant = 'default', onTagClick }: FoodCardProp
   const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     setImageLoaded(true)
     setImageError(true)
-    e.currentTarget.src = '/images/placeholder.png'
+    e.currentTarget.src = `${BASE_URL}images/placeholder.png`
   }, [])
+
+  const imageSrc = imageError
+    ? `${BASE_URL}images/placeholder.png`
+    : `${BASE_URL}images/${food.image}`
 
   return (
     <article
@@ -39,7 +45,7 @@ export function FoodCard({ food, variant = 'default', onTagClick }: FoodCardProp
           <div className="absolute top-0 left-0 w-full h-full animate-pulse bg-gray-300 dark:bg-gray-600" />
         )}
         <img
-          src={imageError ? '/images/placeholder.png' : `/images/${food.image}`}
+          src={imageSrc}
           alt={food.name}
           loading="lazy"
           className={`
