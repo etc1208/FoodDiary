@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 
 const BASE_URL = import.meta.env.BASE_URL
 

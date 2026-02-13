@@ -8,7 +8,7 @@ import { EmptyState } from './components/EmptyState'
 
 import foodsData from './data/foods.json'
 
-import type { FoodItem, FoodsData, ViewMode } from './types/food'
+import type { FoodsData, ViewMode } from './types/food'
 
 const data = foodsData as FoodsData
 
