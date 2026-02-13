@@ -11,7 +11,7 @@
 
 ---
 
-## Phase 1: MVP - 项目初始化与基础框架
+## Phase 1: 项目初始化与基础框架
 
 > 目标：搭建项目基础结构，配置开发环境
 
@@ -45,13 +45,13 @@
 - [x] 创建 `src/types/food.ts`
 - [x] 定义 `FoodItem` 接口：id, name, description, tags, date, image
 - [x] 定义 `FoodsData` 接口：items, allTags
-- [x] 定义 `ViewMode` 类型：'timeline' | 'masonry' | 'card3d' | 'carousel3d'
+- [x] 定义 `ViewMode` 类型：'timeline' | 'masonry'
 - [x] 定义 `Theme` 类型：'light' | 'dark' | 'system'
 - [x] 验收：TypeScript 编译无错误
 
 ---
 
-## Phase 2: MVP - 数据层
+## Phase 2: 数据层
 
 > 目标：实现 Markdown 解析脚本，构建时生成 JSON 数据
 
@@ -92,15 +92,15 @@
 
 ### Task 2.4: [Setup] 创建示例数据
 
-- [x] 创建 `content/foods/2024-01-15-hongshao-rou.md`，包含完整 frontmatter
-- [x] 创建 `content/foods/2024-01-20-tiramisu.md`，包含完整 frontmatter
-- [x] 添加示例占位图片 `public/images/placeholder.svg`
+- [x] 创建 `content/foods/2024-01-15-hongshao-rou.md`
+- [x] 创建 `content/foods/2024-01-20-tiramisu.md`
+- [x] 添加示例占位图片 `public/images/placeholder.png`
 - [x] 运行 `pnpm run build:data`
 - [x] 验收：`src/data/foods.json` 生成且内容正确
 
 ---
 
-## Phase 3: MVP - 基础组件
+## Phase 3: 基础组件
 
 > 目标：实现核心 UI 组件，包括卡片、标签筛选、主题切换
 
@@ -148,9 +148,9 @@
 
 ---
 
-## Phase 4: MVP - 时间线展示
+## Phase 4: 展示组件
 
-> 目标：实现时间线展示模式，按日期分组展示美食卡片
+> 目标：实现时间线和瀑布流展示模式
 
 ### Task 4.1: [TDD] 实现日期分组逻辑
 
@@ -183,16 +183,23 @@
 - [x] 实现卡片列表布局
 - [x] 验收：时间线展示正确
 
-### Task 4.3: [Setup] 响应式布局适配
+### Task 4.3: [Setup] 实现 MasonryView 组件
 
-- [x] 移动端：单列卡片流
-- [x] 桌面端：卡片交错左右排列
-- [x] 使用 Tailwind 响应式类名
-- [x] 验收：不同屏幕尺寸布局正确
+- [x] 创建 `src/components/MasonryView.tsx`
+- [x] 使用 CSS columns 实现瀑布流布局
+- [x] 移动端 2 列，平板 3 列，桌面 4 列
+- [x] 验收：瀑布流布局正确
+
+### Task 4.4: [Setup] 实现 ViewSwitcher 组件
+
+- [x] 创建 `src/components/ViewSwitcher.tsx`
+- [x] 实现两种模式图标按钮：时间线、瀑布流
+- [x] 当前模式高亮显示
+- [x] 验收：点击按钮正确触发回调
 
 ---
 
-## Phase 5: MVP - 整合与部署
+## Phase 5: 整合与部署
 
 > 目标：整合所有组件，配置部署流程
 
@@ -202,7 +209,7 @@
 - [x] 导入 foods.json 数据
 - [x] 实现 `activeTag` 状态管理
 - [x] 实现 `filteredFoods` 计算逻辑
-- [x] 组合 Header、TagFilter、TimelineView、EmptyState
+- [x] 组合 Header、TagFilter、TimelineView、MasonryView、EmptyState
 - [x] 验收：完整页面渲染正确
 
 ### Task 5.2: [Setup] 配置入口文件
@@ -224,166 +231,14 @@
 - [x] 配置 deploy-pages 部署步骤
 - [x] 验收：配置文件语法正确
 
-### Task 5.5: [Setup] MVP 验收测试
+### Task 5.5: [Setup] 验收测试
 
 - [x] 验证时间线展示按日期倒序
+- [x] 验证瀑布流展示正确
 - [x] 验证标签筛选功能正常
 - [x] 验证深浅色切换正常
-- [x] 验证移动端布局正常
-- [x] 验证图片懒加载生效
-- [x] 验证空状态显示正确
-- [x] 验收：所有 MVP 功能正常工作
-
----
-
-> ⚠️ 完成 Phase 5（MVP）后暂停，等待确认
-
----
-
-## Phase 6: 瀑布流布局
-
-> 目标：实现 Pinterest 风格的瀑布流展示模式
-
-### Task 6.1: [Setup] 实现 MasonryView 组件
-
-- [x] 创建 `src/components/MasonryView.tsx`
-- [x] 使用 CSS columns 实现瀑布流布局
-- [x] 移动端 2 列，平板 3 列，桌面 4 列
-- [x] 使用 FoodCard compact 变体
-- [x] 验收：瀑布流布局正确
-
-### Task 6.2: [Setup] 响应式列数适配
-
-- [x] 使用 Tailwind 断点实现响应式列数
-- [x] 处理 column-break 避免卡片被截断
-- [x] 验收：不同屏幕尺寸列数正确
-
----
-
-## Phase 7: 3D 卡片浮动效果
-
-> 目标：实现卡片随鼠标/触摸旋转的 3D 效果
-
-### Task 7.1: [TDD] 实现 3D 性能检测
-
-**[Red] 编写测试**
-
-- [x] 创建 `src/utils/__tests__/shouldEnable3D.test.ts`
-- [x] 用例1：支持 3D 且非低端设备 → 返回 true
-- [x] 用例2：不支持 3D transforms → 返回 false
-- [x] 用例3：用户偏好减少动画 → 返回 false
-- [x] 用例4：低端设备 → 返回 false
-- [x] 运行测试确认失败（红色）
-
-**[Green] 实现功能**
-
-- [x] 创建 `src/utils/shouldEnable3D.ts`
-- [x] 实现 `shouldEnable3D()` - 检测设备能力
-- [x] 运行测试确认通过（绿色）
-
-**[Refactor] 重构优化**
-
-- [x] 代码简洁，无需额外重构
-- [x] 运行测试确认仍通过
-
-### Task 7.2: [Setup] 实现 Card3DView 组件
-
-- [x] 创建 `src/components/Card3DView.tsx`
-- [x] 实现卡片网格布局
-- [x] 实现鼠标移动跟踪计算旋转角度
-- [x] 实现 CSS 3D transform 效果
-- [x] 实现触摸设备支持
-- [x] 实现低端设备降级为普通布局
-- [x] 验收：3D 效果在支持的设备上正常工作
-
----
-
-## Phase 8: 展示模式切换
-
-> 目标：实现多种展示模式之间的切换
-
-### Task 8.1: [Setup] 实现 ViewSwitcher 组件
-
-- [x] 创建 `src/components/ViewSwitcher.tsx`
-- [x] 实现三种模式图标按钮：时间线、瀑布流、3D 卡片
-- [x] 当前模式高亮显示
-- [x] 验收：点击按钮正确触发回调
-
-### Task 8.2: [Setup] 整合展示模式到 App
-
-- [x] 修改 `src/App.tsx`
-- [x] 添加 `viewMode` 状态
-- [x] 根据 viewMode 渲染对应的 View 组件
-- [x] 添加 ViewSwitcher 到筛选栏
-- [x] 验收：模式切换功能正常
-
----
-
-> ⚠️ 完成 Phase 8（瀑布流 + 3D 卡片）后暂停，等待确认
-
----
-
-## Phase 9: 3D 圆柱/球体展示
-
-> 目标：实现卡片环绕成圆柱的 3D 展示效果
-
-### Task 9.1: [Setup] 实现 Carousel3DView 组件
-
-- [x] 创建 `src/components/Carousel3DView.tsx`
-- [x] 计算每张卡片的 rotateY 角度
-- [x] 实现 translateZ 设置半径
-- [x] 实现整体容器旋转动画
-- [x] 实现触摸滑动切换
-- [x] 实现左右导航按钮
-- [x] 验收：3D 轮播效果正常
-
-### Task 9.2: [Setup] 更新 ViewSwitcher
-
-- [x] 添加 3D 轮播模式选项
-- [x] 更新 App 组件支持新模式
-- [x] 验收：四种模式都能正常切换
-
----
-
-## Phase 10: 性能优化与最终验收
-
-> 目标：优化性能，完成最终验收
-
-### Task 10.1: [Setup] 图片懒加载优化
-
-- [x] 使用原生 loading="lazy" + 状态管理
-- [x] 添加图片加载骨架屏（animate-pulse）
-- [x] 验收：图片懒加载顺畅
-
-### Task 10.2: [Setup] 3D 效果按需加载
-
-- [x] shouldEnable3D 检测设备能力
-- [x] 低端设备自动降级为普通布局
-- [x] 验收：按需降级正常
-
-### Task 10.3: [Setup] 移动端性能调优
-
-- [x] 低端设备（hardwareConcurrency <= 2）禁用 3D
-- [x] prefers-reduced-motion 禁用 3D
-- [x] CSS 3D transforms 无额外 JS 开销
-- [x] 验收：移动端滚动流畅
-
-### Task 10.4: [Setup] 最终验收测试
-
-- [x] 验证时间线模式正常
-- [x] 验证瀑布流模式正常
-- [x] 验证 3D 卡片浮动效果正常
-- [x] 验证 3D 轮播效果正常
-- [x] 验证标签筛选功能正常
-- [x] 验证深浅色模式切换正常
-- [x] 验证移动端体验流畅
-- [x] 验证 3D 效果降级正常
-- [x] 运行 `pnpm run build` 确认构建成功
+- [x] 验证图片加载正常（使用 BASE_URL）
 - [x] 验收：所有功能正常工作
-
----
-
-> ⚠️ 完成 Phase 10（全部功能）后暂停，等待最终确认
 
 ---
 

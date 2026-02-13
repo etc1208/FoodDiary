@@ -8,8 +8,6 @@ interface ViewSwitcherProps {
 const viewOptions: Array<{ mode: ViewMode; icon: string; label: string }> = [
   { mode: 'timeline', icon: '📅', label: '时间线' },
   { mode: 'masonry', icon: '🧱', label: '瀑布流' },
-  { mode: 'card3d', icon: '✨', label: '3D卡片' },
-  { mode: 'carousel3d', icon: '🎡', label: '3D轮播' },
 ]
 
 export function ViewSwitcher({ viewMode, onViewChange }: ViewSwitcherProps): React.ReactElement {

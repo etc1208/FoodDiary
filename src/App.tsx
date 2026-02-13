@@ -5,8 +5,6 @@ import { TagFilter } from './components/TagFilter'
 import { ViewSwitcher } from './components/ViewSwitcher'
 import { TimelineView } from './components/TimelineView'
 import { MasonryView } from './components/MasonryView'
-import { Card3DView } from './components/Card3DView'
-import { Carousel3DView } from './components/Carousel3DView'
 import { EmptyState } from './components/EmptyState'
 
 import foodsData from './data/foods.json'
@@ -45,10 +43,6 @@ export function App(): React.ReactElement {
     switch (viewMode) {
       case 'masonry':
         return <MasonryView foods={filteredFoods} onTagClick={handleTagClick} />
-      case 'card3d':
-        return <Card3DView foods={filteredFoods} onTagClick={handleTagClick} />
-      case 'carousel3d':
-        return <Carousel3DView foods={filteredFoods} onTagClick={handleTagClick} />
       case 'timeline':
       default:
         return <TimelineView foods={filteredFoods} onTagClick={handleTagClick} />

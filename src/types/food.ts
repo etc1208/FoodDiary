@@ -12,6 +12,6 @@ export interface FoodsData {
   allTags: string[]
 }
 
-export type ViewMode = 'timeline' | 'masonry' | 'card3d' | 'carousel3d'
+export type ViewMode = 'timeline' | 'masonry'
 
 export type Theme = 'light' | 'dark' | 'system'

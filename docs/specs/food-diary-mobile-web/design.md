@@ -8,8 +8,7 @@
 | 方面 | 选择 | 理由 |
 |------|------|------|
 | 框架 | React + Vite | 构建快，生态好 |
-| 样式 | Tailwind CSS | 原子化 CSS，开发效率高 |
-| 3D 效果 | CSS 3D transforms | 无额外依赖，性能好 |
+| 样式 | Tailwind CSS v4 | 原子化 CSS，开发效率高 |
 | 状态管理 | useState | 简单场景足够 |
 | 数据 | 构建时解析 Markdown | 零运行时开销 |
 | 路由 | 无（单页应用） | 简单直接 |
@@ -38,13 +37,13 @@ content/*.md + images/ → Vite 构建时解析 → 静态 JSON → React 渲染
 │   │   ├── FoodCard.tsx          # 美食卡片（复用于各模式）
 │   │   ├── TimelineView.tsx      # 时间线展示
 │   │   ├── MasonryView.tsx       # 瀑布流展示
-│   │   ├── Card3DView.tsx        # 3D 卡片浮动
-│   │   ├── Carousel3DView.tsx    # 3D 圆柱/球体展示
 │   │   └── EmptyState.tsx        # 空状态
 │   ├── hooks/
 │   │   └── useTheme.ts           # 深浅色主题 hook
 │   ├── types/
 │   │   └── food.ts               # 类型定义
+│   ├── utils/
+│   │   └── groupByDate.ts        # 日期分组工具
 │   ├── data/
 │   │   └── foods.json            # 构建时生成的数据文件
 │   ├── main.tsx                  # 入口
@@ -77,8 +76,6 @@ flowchart TB
         subgraph Views["展示组件"]
             TimelineView
             MasonryView
-            Card3DView
-            Carousel3DView
         end
 
         Views --> FoodCard
@@ -125,7 +122,7 @@ interface FoodsData {
 - **文件**: `src/components/App.tsx`
 
 ```typescript
-type ViewMode = 'timeline' | 'masonry' | 'card3d' | 'carousel3d'
+type ViewMode = 'timeline' | 'masonry'
 
 interface AppState {
   activeTag: string | null
@@ -178,56 +175,11 @@ interface TimelineViewProps {
 - **文件**: `src/components/MasonryView.tsx`
 
 **实现要点**：
-- 使用 CSS columns 或 grid 实现
+- 使用 CSS columns 实现
 - 移动端 2 列，桌面端 3-4 列
 - 图片高度不一时保持视觉平衡
 
-### 4.6 3D 卡片浮动组件
-
-- **职责**: 卡片在 3D 空间中悬浮、随鼠标/触摸旋转
-- **文件**: `src/components/Card3DView.tsx`
-
-**实现要点**：
-- CSS `transform-style: preserve-3d`
-- `perspective` 设置视角距离
-- 鼠标移动 → 计算角度 → 更新 `rotateX/rotateY`
-- 触摸设备：陀螺仪或触摸位置
-
-```css
-.card-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
-}
-
-.card-3d:hover {
-  transform: rotateY(var(--rotateY)) rotateX(var(--rotateX));
-}
-```
-
-### 4.7 3D 圆柱/球体展示组件
-
-- **职责**: 卡片环绕成圆柱或球体，可旋转浏览
-- **文件**: `src/components/Carousel3DView.tsx`
-
-**实现要点**：
-- 计算每张卡片的 `rotateY` 角度（360° / 卡片数）
-- `translateZ` 设置半径
-- 整体容器旋转实现切换
-- 触摸滑动或自动轮播
-
-```css
-.carousel-container {
-  transform-style: preserve-3d;
-  transform: rotateY(var(--angle));
-}
-
-.carousel-item {
-  position: absolute;
-  transform: rotateY(calc(var(--index) * 45deg)) translateZ(300px);
-}
-```
-
-### 4.8 美食卡片组件
+### 4.6 美食卡片组件
 
 - **职责**: 展示单个美食记录，复用于各展示模式
 - **文件**: `src/components/FoodCard.tsx`
@@ -240,7 +192,7 @@ interface FoodCardProps {
 ```
 
 **内容**：
-- 图片（懒加载）
+- 图片（懒加载 + 骨架屏）
 - 名称
 - 描述（可截断）
 - 标签列表
@@ -253,7 +205,7 @@ interface FoodCardProps {
 Vite 构建前执行脚本解析 Markdown：
 
 ```typescript
-// scripts/build-data.ts 伪代码
+// scripts/build-data.ts
 async function buildData() {
   const files = glob.sync('content/foods/*.md')
   const items = files.map(file => {
@@ -269,82 +221,33 @@ async function buildData() {
     }
   })
 
-  // 按日期倒序
   items.sort((a, b) => b.date.localeCompare(a.date))
-
-  // 提取所有标签
   const allTags = [...new Set(items.flatMap(i => i.tags))]
 
   fs.writeFileSync('src/data/foods.json', JSON.stringify({ items, allTags }))
 }
 ```
 
-package.json 配置：
-```json
-{
-  "scripts": {
-    "prebuild": "tsx scripts/build-data.ts",
-    "build": "vite build"
-  }
-}
-```
-
-### 5.2 图片懒加载
-
-使用原生 `loading="lazy"` + Intersection Observer 双重保障：
+### 5.2 图片懒加载与骨架屏
 
 ```tsx
 // FoodCard 中的图片处理
+const [imageLoaded, setImageLoaded] = useState(false)
+
 <img
-  src={`/images/${food.image}`}
+  src={`${BASE_URL}images/${food.image}`}
   alt={food.name}
   loading="lazy"
-  onError={(e) => {
-    e.currentTarget.src = '/images/placeholder.jpg'
-  }}
+  className={`transition-opacity ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+  onLoad={() => setImageLoaded(true)}
 />
+
+{!imageLoaded && (
+  <div className="absolute animate-pulse bg-gray-300" />
+)}
 ```
 
-### 5.3 CSS 3D 卡片交互
-
-```typescript
-// Card3DView 中的鼠标跟踪
-function handleMouseMove(e: MouseEvent, cardRef: HTMLDivElement) {
-  const rect = cardRef.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-  const centerX = rect.width / 2
-  const centerY = rect.height / 2
-
-  const rotateY = ((x - centerX) / centerX) * 15 // 最大 15 度
-  const rotateX = ((centerY - y) / centerY) * 15
-
-  cardRef.style.setProperty('--rotateX', `${rotateX}deg`)
-  cardRef.style.setProperty('--rotateY', `${rotateY}deg`)
-}
-```
-
-### 5.4 3D 性能优化
-
-```typescript
-// 检测设备性能，低端设备降级
-function shouldEnable3D(): boolean {
-  // 检查是否支持 3D transforms
-  const supports3D = CSS.supports('transform-style', 'preserve-3d')
-
-  // 检查是否低端设备（简单判断）
-  const isLowEnd = navigator.hardwareConcurrency <= 2
-
-  // 用户偏好减少动画
-  const prefersReducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
-  ).matches
-
-  return supports3D && !isLowEnd && !prefersReducedMotion
-}
-```
-
-### 5.5 GitHub Actions 部署
+### 5.3 GitHub Actions 部署
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -359,19 +262,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - run: npm ci
-      - run: npm run build
-
-      - uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+      - run: pnpm install
+      - run: pnpm run build
+      - uses: actions/deploy-pages@v4
 ```
 
 ## 6. 依赖关系
@@ -384,86 +279,49 @@ jobs:
 **开发依赖**：
 - `vite`, `@vitejs/plugin-react`
 - `typescript`, `@types/react`, `@types/react-dom`
-- `tailwindcss`, `postcss`, `autoprefixer`
+- `tailwindcss`, `@tailwindcss/postcss`, `postcss`, `autoprefixer`
 - `gray-matter` (解析 Markdown frontmatter)
 - `glob` (文件扫描)
 - `tsx` (执行 TypeScript 脚本)
-
-### 需要创建的新文件
-
-全部为新建文件（新项目）。
+- `vitest` (测试框架)
 
 ## 7. 测试要点
 
 - **数据解析**：Markdown 格式正确解析，异常格式有提示
 - **标签筛选**：点击标签正确过滤，再次点击取消
-- **展示模式切换**：四种模式切换平滑，数据保持一致
+- **展示模式切换**：两种模式切换平滑，数据保持一致
 - **主题切换**：深浅色正确切换，刷新后保持
 - **响应式**：移动端/桌面端布局正确
-- **3D 效果**：支持的设备正常显示，不支持的优雅降级
 - **图片加载**：懒加载生效，失败显示占位图
 - **空状态**：无数据或筛选无结果时显示引导
 
 ## 8. 实现顺序
 
-### 阶段一：MVP
-
-#### 子功能 1.1: 项目初始化
+### 阶段一：基础框架
 1. 创建 Vite + React + TypeScript 项目
 2. 配置 Tailwind CSS
-3. 配置项目目录结构
+3. 创建项目目录结构
 4. 创建类型定义文件
 
-#### 子功能 1.2: 数据层
+### 阶段二：数据层
 1. 编写 `build-data.ts` 脚本
 2. 创建示例 Markdown 文件测试解析
 3. 验证 JSON 输出正确
 
-#### 子功能 1.3: 基础组件
+### 阶段三：基础组件
 1. 实现 `FoodCard` 组件
 2. 实现 `Header` 组件（含主题切换）
 3. 实现 `useTheme` hook
 4. 实现 `TagFilter` 组件
 5. 实现 `EmptyState` 组件
 
-#### 子功能 1.4: 时间线展示
+### 阶段四：展示组件
 1. 实现 `TimelineView` 组件
-2. 按日期分组逻辑
-3. 响应式布局适配
+2. 实现 `MasonryView` 组件
+3. 实现 `ViewSwitcher` 组件
 
-#### 子功能 1.5: 整合与部署
+### 阶段五：整合与部署
 1. 实现 `App` 组件，整合状态管理
 2. 配置 GitHub Actions
 3. 部署到 GitHub Pages
 4. 验收测试
-
-### 阶段二：瀑布流 + 3D 卡片
-
-#### 子功能 2.1: 瀑布流布局
-1. 实现 `MasonryView` 组件
-2. 响应式列数适配
-
-#### 子功能 2.2: 3D 卡片浮动
-1. 实现 `Card3DView` 组件
-2. 鼠标/触摸交互
-3. 性能检测与降级
-
-#### 子功能 2.3: 展示模式切换
-1. 实现 `ViewSwitcher` 组件
-2. 整合到 App 中
-
-### 阶段三：3D 轮播 + 优化
-
-#### 子功能 3.1: 3D 圆柱/球体展示
-1. 实现 `Carousel3DView` 组件
-2. 触摸滑动交互
-3. 自动轮播（可选）
-
-#### 子功能 3.2: 性能优化
-1. 图片懒加载优化
-2. 3D 效果按需加载
-3. 移动端性能调优
-
-## 9. 待澄清
-
-- 暂无
