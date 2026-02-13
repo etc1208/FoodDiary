@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
 
+import { ImagePreview } from './ImagePreview'
+
 import type { FoodItem } from '../types/food'
 
 const BASE_URL = import.meta.env.BASE_URL
@@ -7,12 +9,12 @@ const BASE_URL = import.meta.env.BASE_URL
 interface FoodCardProps {
   food: FoodItem
   variant?: 'default' | 'compact' | 'featured'
-  onTagClick?: (tag: string) => void
 }
 
-export function FoodCard({ food, variant = 'default', onTagClick }: FoodCardProps): React.ReactElement {
+export function FoodCard({ food, variant = 'default' }: FoodCardProps): React.ReactElement {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const isCompact = variant === 'compact'
   const isFeatured = variant === 'featured'
@@ -34,7 +36,8 @@ export function FoodCard({ food, variant = 'default', onTagClick }: FoodCardProp
   return (
     <article
       className={`
-        bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md
+        bg-white dark:bg-gray-800 rounded-xl overflow-hidden
+        ${isCompact ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]' : 'shadow-md'}
         ${isFeatured ? 'shadow-lg' : ''}
         ${isCompact ? '' : 'hover:shadow-lg transition-shadow'}
       `}
@@ -44,64 +47,62 @@ export function FoodCard({ food, variant = 'default', onTagClick }: FoodCardProp
         {!imageLoaded && (
           <div className="absolute top-0 left-0 w-full h-full animate-pulse bg-gray-300 dark:bg-gray-600" />
         )}
-        <img
-          src={imageSrc}
-          alt={food.name}
-          loading="lazy"
-          className={`
-            w-full h-full object-cover transition-opacity duration-300
-            ${imageLoaded ? 'opacity-100' : 'opacity-0'}
-          `}
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-        />
-      </div>
-
-      <div className={`p-4 ${isCompact ? 'p-3' : ''}`}>
-        <h3
-          className={`
-            font-semibold text-gray-900 dark:text-white
-            ${isFeatured ? 'text-xl' : isCompact ? 'text-sm' : 'text-lg'}
-            ${isCompact ? 'line-clamp-1' : ''}
-          `}
+        <button
+          type="button"
+          className="absolute top-0 left-0 w-full h-full cursor-zoom-in"
+          onClick={() => setShowPreview(true)}
+          aria-label={`放大查看 ${food.name}`}
         >
-          {food.name}
-        </h3>
+          <img
+            src={imageSrc}
+            alt={food.name}
+            loading="lazy"
+            className={`
+              w-full h-full object-cover transition-opacity duration-300
+              ${imageLoaded ? 'opacity-100' : 'opacity-0'}
+            `}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            draggable={false}
+          />
+        </button>
+      </div>
 
+      <div className={`${isCompact ? 'p-0' : 'p-3'}`}>
         {!isCompact && (
-          <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm line-clamp-2">
-            {food.description}
-          </p>
-        )}
-
-        <div className={`flex flex-wrap mt-3 ${isCompact ? 'mt-2' : ''}`}>
-          {food.tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => onTagClick?.(tag)}
-              className={`
-                mr-2 mb-1 px-2 py-0.5 rounded-full text-xs
-                bg-gray-100 dark:bg-gray-700
-                text-gray-600 dark:text-gray-300
-                hover:bg-gray-200 dark:hover:bg-gray-600
-                transition-colors
-              `}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-
-        {!isCompact && (
-          <time
-            dateTime={food.date}
-            className="block mt-2 text-xs text-gray-400 dark:text-gray-500"
-          >
-            {food.date}
-          </time>
+          <div className="flex flex-wrap mt-2">
+            {food.tags.map((tag, index) => {
+              const colors = [
+                'bg-stone-100/85 text-stone-700/90',
+                'bg-slate-100/85 text-slate-700/90',
+                'bg-zinc-100/85 text-zinc-700/90',
+                'bg-neutral-100/85 text-neutral-700/90',
+              ]
+              const colorClass = colors[index % colors.length]
+              return (
+                <span
+                  key={tag}
+                  className={`
+                    mr-2 mb-2 px-3 py-1.5 rounded-lg text-sm font-medium
+                    ${colorClass}
+                    backdrop-blur-[2px]
+                  `}
+                >
+                  {tag}
+                </span>
+              )
+            })}
+          </div>
         )}
       </div>
+
+      {showPreview && (
+        <ImagePreview
+          src={`images/${food.image}`}
+          alt={food.name}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </article>
   )
 }

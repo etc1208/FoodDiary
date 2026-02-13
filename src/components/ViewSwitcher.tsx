@@ -1,13 +1,15 @@
 import type { ViewMode } from '../types/food'
 
+const BASE_URL = import.meta.env.BASE_URL
+
 interface ViewSwitcherProps {
   viewMode: ViewMode
   onViewChange: (mode: ViewMode) => void
 }
 
 const viewOptions: Array<{ mode: ViewMode; icon: string; label: string }> = [
-  { mode: 'timeline', icon: '📅', label: '时间线' },
-  { mode: 'masonry', icon: '🧱', label: '瀑布流' },
+  { mode: 'timeline', icon: 'timeline.png', label: '时间线' },
+  { mode: 'masonry', icon: 'masonry.png', label: '瀑布流' },
 ]
 
 export function ViewSwitcher({ viewMode, onViewChange }: ViewSwitcherProps): React.ReactElement {
@@ -30,7 +32,7 @@ export function ViewSwitcher({ viewMode, onViewChange }: ViewSwitcherProps): Rea
           aria-label={label}
           aria-pressed={viewMode === mode}
         >
-          <span className="mr-1">{icon}</span>
+          <img src={`${BASE_URL}icons/${icon}`} alt="" className="w-5 h-5 mr-1" />
           <span className="hidden sm:inline">{label}</span>
         </button>
       ))}

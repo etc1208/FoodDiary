@@ -4,10 +4,9 @@ import type { FoodItem } from '../types/food'
 
 interface MasonryViewProps {
   foods: FoodItem[]
-  onTagClick?: (tag: string) => void
 }
 
-export function MasonryView({ foods, onTagClick }: MasonryViewProps): React.ReactElement {
+export function MasonryView({ foods }: MasonryViewProps): React.ReactElement {
   return (
     <div
       className="
@@ -18,9 +17,9 @@ export function MasonryView({ foods, onTagClick }: MasonryViewProps): React.Reac
       {foods.map((food) => (
         <div
           key={food.id}
-          className="mb-4 break-inside-avoid"
+          className="mb-2 break-inside-avoid"
         >
-          <FoodCard food={food} variant="compact" onTagClick={onTagClick} />
+          <FoodCard food={food} variant="compact" />
         </div>
       ))}
     </div>

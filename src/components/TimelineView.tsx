@@ -5,7 +5,6 @@ import type { FoodItem } from '../types/food'
 
 interface TimelineViewProps {
   foods: FoodItem[]
-  onTagClick?: (tag: string) => void
 }
 
 function formatDate(dateStr: string): string {
@@ -16,7 +15,7 @@ function formatDate(dateStr: string): string {
   return `${year}年${month}月${day}日`
 }
 
-export function TimelineView({ foods, onTagClick }: TimelineViewProps): React.ReactElement {
+export function TimelineView({ foods }: TimelineViewProps): React.ReactElement {
   const groupedFoods = groupByDate(foods)
   const dates = Object.keys(groupedFoods)
 
@@ -70,7 +69,7 @@ export function TimelineView({ foods, onTagClick }: TimelineViewProps): React.Re
                       ${isEven ? 'md:mr-auto md:pr-8' : 'md:ml-auto md:pl-8'}
                     `}
                   >
-                    <FoodCard food={food} onTagClick={onTagClick} />
+                    <FoodCard food={food} />
                   </div>
                 )
               })}

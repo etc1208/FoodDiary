@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from 'react'
+
 interface TagFilterProps {
   allTags: string[]
   activeTag: string | null
@@ -5,44 +7,62 @@ interface TagFilterProps {
 }
 
 export function TagFilter({ allTags, activeTag, onTagChange }: TagFilterProps): React.ReactElement {
-  return (
-    <div className="overflow-x-auto scrollbar-hide">
-      <div className="flex py-3 px-4 space-x-2">
-        <button
-          type="button"
-          onClick={() => onTagChange(null)}
-          className={`
-            flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium
-            transition-colors whitespace-nowrap
-            ${
-              activeTag === null
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }
-          `}
-        >
-          全部
-        </button>
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-        {allTags.map((tag) => (
+  const displayLabel = activeTag ?? '全部标签'
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelect = (tag: string | null) => {
+    onTagChange(tag)
+    setIsOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} className="relative flex-1">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-base font-medium text-gray-900 dark:text-white"
+      >
+        <span>{displayLabel}</span>
+        <span className={`ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10 overflow-hidden">
           <button
-            key={tag}
             type="button"
-            onClick={() => onTagChange(activeTag === tag ? null : tag)}
-            className={`
-              flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium
-              transition-colors whitespace-nowrap
-              ${
-                activeTag === tag
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }
-            `}
+            onClick={() => handleSelect(null)}
+            className="w-full px-4 py-2.5 text-base text-left text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            {tag}
+            全部标签
           </button>
-        ))}
-      </div>
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => handleSelect(tag)}
+              className={`w-full px-4 py-2.5 text-base text-left ${
+                activeTag === tag
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-medium'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -32,9 +32,9 @@ content/*.md + images/ → Vite 构建时解析 → 静态 JSON → React 渲染
 │   ├── components/
 │   │   ├── App.tsx               # 根组件，状态管理
 │   │   ├── Header.tsx            # 顶部导航，主题切换
-│   │   ├── TagFilter.tsx         # 标签筛选栏
 │   │   ├── ViewSwitcher.tsx      # 展示模式切换
 │   │   ├── FoodCard.tsx          # 美食卡片（复用于各模式）
+│   │   ├── ImagePreview.tsx      # 图片预览弹窗
 │   │   ├── TimelineView.tsx      # 时间线展示
 │   │   ├── MasonryView.tsx       # 瀑布流展示
 │   │   └── EmptyState.tsx        # 空状态
@@ -69,9 +69,8 @@ flowchart TB
 
     subgraph Runtime["运行时"]
         JSON --> App
-        App --> |activeTag| TagFilter
         App --> |viewMode| ViewSwitcher
-        App --> |filteredFoods| Views
+        App --> |foods| Views
 
         subgraph Views["展示组件"]
             TimelineView
@@ -79,10 +78,11 @@ flowchart TB
         end
 
         Views --> FoodCard
+        FoodCard --> ImagePreview
     end
 
-    User([用户]) --> |切换标签| TagFilter
-    User --> |切换模式| ViewSwitcher
+    User([用户]) --> |切换模式| ViewSwitcher
+    User --> |点击图片| ImagePreview
     User --> |切换主题| Header
 ```
 
@@ -125,13 +125,11 @@ interface FoodsData {
 type ViewMode = 'timeline' | 'masonry'
 
 interface AppState {
-  activeTag: string | null
   viewMode: ViewMode
 }
 ```
 
 **状态流转**：
-- `activeTag` 改变 → 过滤 `foods` → 传给当前 View
 - `viewMode` 改变 → 切换展示组件
 
 ### 4.3 主题切换 Hook
@@ -192,11 +190,28 @@ interface FoodCardProps {
 ```
 
 **内容**：
-- 图片（懒加载 + 骨架屏）
-- 名称
-- 描述（可截断）
-- 标签列表
+- 图片（懒加载 + 骨架屏 + 点击预览）
+- 标签列表（菜名）
 - 日期
+
+### 4.7 图片预览组件
+
+- **职责**: 居中预览图片，支持关闭
+- **文件**: `src/components/ImagePreview.tsx`
+
+```typescript
+interface ImagePreviewProps {
+  src: string
+  alt: string
+  onClose: () => void
+}
+```
+
+**实现要点**：
+- 全屏半透明黑色背景
+- 图片使用 `max-w-full max-h-full object-contain` 自适应屏幕
+- 点击背景或关闭按钮退出
+- 按 ESC 键退出
 
 ## 5. 关键实现细节
 
@@ -247,7 +262,19 @@ const [imageLoaded, setImageLoaded] = useState(false)
 )}
 ```
 
-### 5.3 GitHub Actions 部署
+### 5.3 图片预览实现
+
+```tsx
+// ImagePreview 组件
+<img
+  src={`${BASE_URL}${src}`}
+  alt={alt}
+  className="max-w-full max-h-full object-contain"
+  onClick={(e) => e.stopPropagation()}
+/>
+```
+
+### 5.4 GitHub Actions 部署
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -288,12 +315,12 @@ jobs:
 ## 7. 测试要点
 
 - **数据解析**：Markdown 格式正确解析，异常格式有提示
-- **标签筛选**：点击标签正确过滤，再次点击取消
 - **展示模式切换**：两种模式切换平滑，数据保持一致
 - **主题切换**：深浅色正确切换，刷新后保持
 - **响应式**：移动端/桌面端布局正确
 - **图片加载**：懒加载生效，失败显示占位图
-- **空状态**：无数据或筛选无结果时显示引导
+- **图片预览**：点击图片打开预览，点击背景或 ESC 关闭
+- **空状态**：无数据时显示引导
 
 ## 8. 实现顺序
 
@@ -312,7 +339,7 @@ jobs:
 1. 实现 `FoodCard` 组件
 2. 实现 `Header` 组件（含主题切换）
 3. 实现 `useTheme` hook
-4. 实现 `TagFilter` 组件
+4. 实现 `ImagePreview` 组件
 5. 实现 `EmptyState` 组件
 
 ### 阶段四：展示组件

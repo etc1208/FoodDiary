@@ -102,7 +102,7 @@
 
 ## Phase 3: 基础组件
 
-> 目标：实现核心 UI 组件，包括卡片、标签筛选、主题切换
+> 目标：实现核心 UI 组件，包括卡片、主题切换、图片预览
 
 ### Task 3.1: [Setup] 实现 useTheme Hook
 
@@ -116,10 +116,11 @@
 ### Task 3.2: [Setup] 实现 FoodCard 组件
 
 - [x] 创建 `src/components/FoodCard.tsx`
-- [x] 实现卡片布局：图片、名称、描述、标签、日期
+- [x] 实现卡片布局：图片、标签、日期
 - [x] 实现图片懒加载 `loading="lazy"`
 - [x] 实现图片加载失败时显示占位图
 - [x] 实现 variant 属性支持：default, compact, featured
+- [x] 实现点击图片预览功能
 - [x] 验收：组件渲染正确，支持深浅色
 
 ### Task 3.3: [Setup] 实现 Header 组件
@@ -130,20 +131,20 @@
 - [x] 使用 useTheme hook
 - [x] 验收：点击按钮可切换主题
 
-### Task 3.4: [Setup] 实现 TagFilter 组件
+### Task 3.4: [Setup] 实现 ImagePreview 组件
 
-- [x] 创建 `src/components/TagFilter.tsx`
-- [x] 接收 `allTags` 和 `activeTag` props
-- [x] 实现标签列表横向滚动展示
-- [x] 实现点击标签选中/取消选中
-- [x] 实现"全部"选项
-- [x] 验收：点击标签正确触发回调
+- [x] 创建 `src/components/ImagePreview.tsx`
+- [x] 实现全屏半透明黑色背景
+- [x] 实现图片居中预览（使用 max-w-full max-h-full object-contain）
+- [x] 实现点击背景或关闭按钮退出
+- [x] 实现按 ESC 键退出
+- [x] 验收：组件渲染正确
 
 ### Task 3.5: [Setup] 实现 EmptyState 组件
 
 - [x] 创建 `src/components/EmptyState.tsx`
 - [x] 实现空状态图标和提示文字
-- [x] 支持不同场景的文案（无数据 vs 筛选无结果）
+- [x] 支持不同场景的文案（无数据）
 - [x] 验收：组件渲染正确
 
 ---
@@ -207,9 +208,8 @@
 
 - [x] 修改 `src/App.tsx`
 - [x] 导入 foods.json 数据
-- [x] 实现 `activeTag` 状态管理
-- [x] 实现 `filteredFoods` 计算逻辑
-- [x] 组合 Header、TagFilter、TimelineView、MasonryView、EmptyState
+- [x] 实现 `viewMode` 状态管理
+- [x] 组合 Header、ViewSwitcher、TimelineView、MasonryView、EmptyState
 - [x] 验收：完整页面渲染正确
 
 ### Task 5.2: [Setup] 配置入口文件
@@ -235,9 +235,9 @@
 
 - [x] 验证时间线展示按日期倒序
 - [x] 验证瀑布流展示正确
-- [x] 验证标签筛选功能正常
 - [x] 验证深浅色切换正常
 - [x] 验证图片加载正常（使用 BASE_URL）
+- [x] 验证图片预览功能正常
 - [x] 验收：所有功能正常工作
 
 ---
